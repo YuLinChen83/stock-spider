@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-      "start": "node index.js",
-      "server": "babel-node index.js",
-      "dev": "NODE_ENV=development npm-run-all server",
+    "start": "node index.js",
+    "server": "babel-node index.js",
+    "dev": "NODE_ENV=development npm-run-all server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,7 +14,8 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
-    "superagent": "^5.1.0"
+    "superagent": "^5.1.0",
+    "superagent-charset": "^1.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",

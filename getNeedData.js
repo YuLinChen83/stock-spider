@@ -1,58 +1,4 @@
-import express from 'express';
-import charset from 'superagent-charset';
 import cheerio from 'cheerio';
-
-const superagent = charset(require('superagent'));
-
-const app = express();
-const myPort = 3000;
-let server = app.listen(myPort, () => {
-  let { host, port } = server.address();
-  console.log('Your App is running at http://localhost:' + myPort);
-})
-
-const getNeedData = () => {
-  return new Promise((resolve, reject) => {
-    superagent
-      .get('https://isin.twse.com.tw/isin/C_public.jsp?strMode=2')  // 取得所有上市股票代碼和產業類型
-      .charset()
-      .end((err, res) => {
-        if (err) {
-          reject(`抓取失敗 - ${err}`);
-          return;
-        } else {
-          let baseInfo = [];
-          let stockList = getListedCompanyInfoList(res)
-          // 取得各股票最新基本資訊
-          stockList.filter((a, i) => i < 5).forEach(stockInfo => {
-            fetchStockInfo(stockInfo.code).then((info) => {
-              console.log(info);
-              baseInfo.push(info);
-            })
-          })
-          resolve(baseInfo);
-        }
-      });
-  });
-}
-
-const fetchStockInfo = (code) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(function () {
-      superagent
-        .get(`https://goodinfo.tw/StockInfo/StockFinDetail.asp?RPT_CAT=IS_M_QUAR_ACC&STOCK_ID=${code}`)
-        .set({ "Content-Type": "application/json", "Accept": "application/json", 'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36' })
-        .end((err2, res2) => {
-          if (err2) {
-            reject(`抓取失敗 - ${err}`);
-            return;
-          } else {
-            resolve(getBaseInfo(res2))
-          }
-        });
-    }, 500);
-  })
-}
 
 const getListedCompanyInfoList = (res) => {
   let $ = cheerio.load(res.text);
@@ -104,10 +50,7 @@ const getBaseInfo = (res) => {
   return data;
 }
 
-app.get('/', async (req, res, next) => {
-  getNeedData().then((data) => {
-    res.send(data);
-  }, (error) => {
-    res.send(error);
-  })
-});
+export {
+  getListedCompanyInfoList,
+  getBaseInfo,
+}
