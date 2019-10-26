@@ -1,6 +1,6 @@
 import cheerio from 'cheerio';
 
-const getListedCompanyInfoList = (res) => {
+export const getListedCompanyInfoList = (res) => {
   let $ = cheerio.load(res.text);
   let list = [];
   const table_tr = $('table.h4 tbody tr');
@@ -8,6 +8,7 @@ const getListedCompanyInfoList = (res) => {
     const data = {};
     const first_td = table_tr.eq(i).find('td');
     data.code = first_td.eq(0).text().split('　')[0];
+    if (data.code === ' 上市認購(售)權證  ') break;
     data.name = first_td.eq(0).text().split('　')[1];
     data.listingDate = first_td.eq(2).text();
     data.industry = first_td.eq(4).text();
@@ -17,14 +18,15 @@ const getListedCompanyInfoList = (res) => {
   return list;
 }
 
-const getBaseInfo = (res) => {
+export const getBaseInfo = (res, stockInfo) => {
   let $ = cheerio.load(res.text);
   let data = {};
   const table_tr_1 = $("table.std_tbl tbody tr:nth-child(1) td.head_td table.none_tbl tr:nth-child(1)");
+  Object.keys(stockInfo).forEach(infoKey => {
+    data[infoKey] = stockInfo[infoKey];
+  })
   for (let i = 0; i < table_tr_1.length; i++) {
     const table_td = table_tr_1.eq(i).find('td');
-    data.code = table_td.eq(0).text().substring(0, 4);
-    data.name = table_td.eq(0).text().substring(5, table_td.eq(0).text().length);
     data.priceEvaluation = table_td.eq(1).text();
     data.PBREvaluation = table_td.eq(2).text();
     data.date = table_td.eq(3).text().substr(6);
@@ -48,9 +50,4 @@ const getBaseInfo = (res) => {
   })
 
   return data;
-}
-
-export {
-  getListedCompanyInfoList,
-  getBaseInfo,
 }

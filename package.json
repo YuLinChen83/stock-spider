@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
+    "dayjs": "^1.8.16",
     "express": "^4.17.1",
+    "firebase": "^7.2.2",
     "superagent": "^5.1.0",
     "superagent-charset": "^1.2.0"
   },
