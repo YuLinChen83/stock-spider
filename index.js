@@ -11,6 +11,9 @@ let server = app.listen(myPort, () => {
   console.log('Your App is running at http://localhost:' + myPort);
 })
 
+
+let baseInfo = [];
+
 const getNeedData = () => {
   return new Promise((resolve, reject) => {
     superagent
@@ -21,36 +24,41 @@ const getNeedData = () => {
           reject(`抓取失敗 - ${err}`);
           return;
         } else {
-          let baseInfo = [];
-          let stockList = getListedCompanyInfoList(res)
+          let stockList = getListedCompanyInfoList(res);
+
           // 取得各股票最新基本資訊
-          stockList.filter((a, i) => i < 5).forEach(stockInfo => {
-            fetchStockInfo(stockInfo.code).then((info) => {
-              console.log(info);
-              baseInfo.push(info);
-            })
+          baseInfo = [];
+          let currentCount = 0;
+          stockList.filter((a, i) => i < 5).forEach((stockInfo, idx) => {
+            fetchStockInfo(stockInfo.code).then(() => {
+              currentCount++;
+              if (currentCount === stockList.filter((a, i) => i < 5).length) {
+                console.log(baseInfo);
+                resolve(baseInfo)
+              }
+            }, error => reject(error))
           })
-          resolve(baseInfo);
         }
       });
-  });
+  })
 }
 
 const fetchStockInfo = (code) => {
   return new Promise((resolve, reject) => {
-    setTimeout(function () {
-      superagent
-        .get(`https://goodinfo.tw/StockInfo/StockFinDetail.asp?RPT_CAT=IS_M_QUAR_ACC&STOCK_ID=${code}`)
-        .set({ "Content-Type": "application/json", "Accept": "application/json", 'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36' })
-        .end((err2, res2) => {
-          if (err2) {
-            reject(`抓取失敗 - ${err}`);
-            return;
-          } else {
-            resolve(getBaseInfo(res2))
-          }
-        });
-    }, 500);
+    // setTimeout(function () {
+    superagent
+      .get(`https://goodinfo.tw/StockInfo/StockFinDetail.asp?RPT_CAT=IS_M_QUAR_ACC&STOCK_ID=${code}`)
+      .set({ "Content-Type": "application/json", "Accept": "application/json", 'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36' })
+      .end((err2, res2) => {
+        if (err2) {
+          reject(`抓取失敗 - ${err}`);
+          return;
+        } else {
+          baseInfo.push(getBaseInfo(res2));
+          resolve();
+        }
+      });
+    // }, 500);
   })
 }
 
